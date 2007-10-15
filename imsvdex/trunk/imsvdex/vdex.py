@@ -21,7 +21,7 @@ from elementtreewriter.xmlwriter import XMLWriter
 from _odict import OrderedDict
 
 import string
-import StringIO
+from StringIO import StringIO
 from types import StringTypes
 try:
     from celementtree.ElementTree import ElementTree
