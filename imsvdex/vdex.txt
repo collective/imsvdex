@@ -2,7 +2,7 @@ DocTest for the vdex module
 --------------------------------
 (c) 2007 by Martin Raspe (hertzhaft@biblhertz.it)
 
-	>>> from vdex import VDEXManager
+	>>> from vdex import VDEXManager, VDEXError
 	>>> from StringIO import StringIO
 
 Parse a test XML string
@@ -64,4 +64,14 @@ Try to parse from a string
 	>>> file = open('test.xml')
 	>>> xmlstring = file.read()
 	>>> vm=VDEXManager(xmlstring)
+
+Try to parse an empty string
+
+	>>> xmlstring = ''
+	>>> try:
+	...  vm=VDEXManager(xmlstring)
+	... except VDEXError:
+	...  result = 'error'
+	>>> result
+	'error'
 

@@ -18,6 +18,7 @@ __docformat__ = 'plaintext'
 
 # ### change the locations for these modules
 from elementtreewriter.xmlwriter import XMLWriter
+from xml.parsers.expat import ExpatError
 from _odict import OrderedDict
 
 import string
