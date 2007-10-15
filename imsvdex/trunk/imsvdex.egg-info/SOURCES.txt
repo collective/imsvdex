@@ -1,0 +1,9 @@
+setup.cfg
+setup.py
+imsvdex/__init__.py
+imsvdex.egg-info/PKG-INFO
+imsvdex.egg-info/SOURCES.txt
+imsvdex.egg-info/dependency_links.txt
+imsvdex.egg-info/entry_points.txt
+imsvdex.egg-info/top_level.txt
+imsvdex.egg-info/zip-safe

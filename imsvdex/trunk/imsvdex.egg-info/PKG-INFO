@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: imsvdex
+Version: 1.0dev
+Summary: Read and write vocabularies in Vocabulary Definition Exchange format specified by imsglobal.org.
+Home-page: UNKNOWN
+Author: Martin Raspe
+Author-email: raspe@biblhertz.it
+License: D-FSL - German Free Software License
+Description: todo
+Keywords: vocabulary xml
+Platform: UNKNOWN
