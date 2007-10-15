@@ -16,14 +16,14 @@
 __author__ = 'Martin Raspe'
 __docformat__ = 'plaintext'
 
-# ### change the locations for these modules
-from elementtreewriter.xmlwriter import XMLWriter
+import string
+from types import StringTypes
+from StringIO import StringIO
+
 from xml.parsers.expat import ExpatError
+from elementtreewriter.xmlwriter import XMLWriter
 from _odict import OrderedDict
 
-import string
-from StringIO import StringIO
-from types import StringTypes
 try:
     from celementtree.ElementTree import ElementTree
 except ImportError:
