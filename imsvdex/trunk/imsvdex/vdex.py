@@ -33,6 +33,11 @@ VDEX_FLAT_PROFILE_TYPES = ('thesaurus', 'glossaryOrDictionary', 'flatTokenTerms'
 TRUE_VALUES = ('1', 'true', 'True', 'yes', 'Yes')
 FALSE_VALUES = ('', '0', 'false', 'False', 'no', 'No')
 
+class VDEXError(Exception):
+    """
+    Denotes an error while handling an IMS-VDEX vocabulary with a VDEXManager
+    """
+
 class VDEXManager(object):
     """
 	Reads an IMS-VDEX vocabulary and constructs a VocabularyDict for ArcheTypes.
@@ -84,17 +89,20 @@ class VDEXManager(object):
         """
         if isinstance(file, StringTypes):
             file = StringIO(file)
-        self.tree = ElementTree(None, file)
-		#        dom = DOMBuilder();
-		#        input = DOMInputSource()
-		#        input._set_byteStream(file)
-		#        self.tree = dom.parse(input)
+        #        dom = DOMBuilder();
+        #        input = DOMInputSource()
+        #        input._set_byteStream(file)
+        #        self.tree = dom.parse(input)
+        try:
+            self.tree = ElementTree(None, file)
+        except ExpatError:
+            raise VDEXError, 'Error while parsing vocabulary XML'
         try:
             filename = file.name
         except AttributeError:
             filename = 'parsed XML text'
         if not self.isVDEX():
-            raise TypeError, 'VDEXManager: vocabulary format not correct in %s' % filename
+            raise VDEXError, 'Vocabulary format not correct in %s' % filename
         self.order_significant = self.isOrderSignificant()
         self.makeTermDict()
         return self.tree

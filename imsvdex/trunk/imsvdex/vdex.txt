@@ -59,3 +59,9 @@ Don't return "(unnamed term)" for a missing term, return the caption in the defa
 	>>> e[0].text
 	'Schas'
 
+Try to parse from a string
+
+	>>> file = open('test.xml')
+	>>> xmlstring = file.read()
+	>>> vm=VDEXManager(xmlstring)
+
