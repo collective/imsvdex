@@ -57,9 +57,9 @@ class VDEXManager(object):
 		lang: set the default language for output ('*' for multilingual terms) 
         namespace: declares the IMS-VDEX namespace in the vocab file
 		  ('' handles VDEX files without any declared namespace).
-        fallback: should the vocabulary return a term in the default language
-          or return self.unnamed_term when there is no translation
-          in the given language?
+        fallback: if no translation is found for the given language
+          should the term be returned in the default language
+          or as self.unnamed_term ?
         """
         if lang is not None:
             self.default_language = lang
@@ -320,16 +320,13 @@ class VDEXManager(object):
             key = self.getTermIdentifier(term)
             self.term_dict[key] = term
 
-#def _test():
-#    file = open('U:/scripts/python/VDEXManager/person_person-ns.vdex', 'rb')
-#    VM = VDEXManager(file, fallback=False)
-#    print VM.getVocabName()
-#    print VM.getVocabIdentifier()
-#    print VM.getVocabularyDict(lang='de')
-#    print VM.getTermCaptionById('relative', lang='de')
-#    print VM.getTermCaptionById('subordinate', lang='*')
-#    print VM.getTermDescriptionById('subordinate', lang='it')
-#    print VM.serialize()
-
 if __name__ == '__main__':
-    pass
+    import doctest
+    import unittest
+    
+    suite = doctest.DocFileSuite(
+            'vdex.txt',
+            optionflags=doctest.ELLIPSIS + doctest.REPORT_ONLY_FIRST_FAILURE)
+            
+    unittest.TextTestRunner().run(suite)
+
