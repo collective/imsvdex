@@ -96,8 +96,8 @@ class VDEXManager(object):
         #        self.tree = dom.parse(input)
         try:
             self.tree = ElementTree(None, file)
-        except ExpatError:
-            raise VDEXError, 'Error while parsing vocabulary XML'
+        except ExpatError, e:
+            raise VDEXError, 'Parse error in vocabulary XML: %s' % e.
         try:
             filename = file.name
         except AttributeError:
