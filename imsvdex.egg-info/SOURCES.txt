@@ -1,4 +1,3 @@
-setup.cfg
 setup.py
 imsvdex/__init__.py
 imsvdex/_odict.py

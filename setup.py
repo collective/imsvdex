@@ -41,7 +41,7 @@ VDEX Version 1 Final Specification is supported.
       zip_safe=False,
       install_requires=[
           'elementtree>=1.2.6',
-          'elementreewriter>=1.0',
+          'elementtreewriter>=1.0',
       ],
       )
       
