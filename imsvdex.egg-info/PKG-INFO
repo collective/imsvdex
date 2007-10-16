@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: imsvdex
-Version: 1.0dev-r51819
+Version: 1.0-betadev-r51833
 Summary: Read and write vocabularies in IMS Vocabulary Definition Exchange format specified.
 Home-page: http://svn.plone.org/svn/collective/imsvdex/
 Author: Martin Raspe
