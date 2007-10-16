@@ -25,7 +25,12 @@ This module takes the VDEX-XML objects and offers an API to them.
 
 VDEX Version 1 Final Specification is supported.
 """,
-      classifiers=[],
+      classifiers=[
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Development Status :: 4 - Beta',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+      ], 
       keywords='vocabulary xml vdex',
       author='Martin Raspe',
       author_email='raspe@biblhertz.it',
