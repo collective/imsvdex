@@ -4,6 +4,9 @@ import sys, os
 version = '1.0'
 
 longdesc = """\
+API to access and modify XML files in the ``IMS Vocabulary Definition Exchange``
+format::
+
     The IMS Vocabulary Definition Exchange (VDEX) specification defines a 
     grammar  for the exchange of value lists of various classes: collections 
     often denoted "vocabulary". Specifically, VDEX defines a grammar for the 
@@ -17,9 +20,9 @@ longdesc = """\
     networks of relationship to be expressed if required [CITVDEXSITE]_.
     
     
-.. [CIT2002] citation from IMS Global, the VDEX-specification-page_. 
+.. [CITVDEXSITE] citation from IMS Global, the VDEX-specification-page_. 
 
-.. VDEX-specification-page_: http://www.imsglobal.org/vdex 
+.. _VDEX-specification-page: http://www.imsglobal.org/vdex 
 
 This module takes the VDEX-XML objects and offers an API to them.
 
