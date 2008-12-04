@@ -112,6 +112,8 @@ class VDEXManager(object):
         """
         returns the vocabulary as XML
         """
+        if file is None:
+            file = StringIO()
         writer = XMLWriter(self.tree)
         return writer(file)
 
