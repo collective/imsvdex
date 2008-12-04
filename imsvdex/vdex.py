@@ -1,6 +1,6 @@
 # File: vdex.py
 #
-# Copyright (c) 2007 by Martin Raspe
+# Copyright (c) 2007-2008 by Martin Raspe
 # Bibliotheca Hertziana (Max-Planck-Institute for Art History), Rome, Italy
 # This code was written for the ZUCCARO Project
 # see http://zuccaro.biblhertz.it
@@ -13,7 +13,7 @@
 
 #
 
-__author__ = 'Martin Raspe'
+__author__ = 'Martin Raspe, Jens Klein'
 __docformat__ = 'plaintext'
 
 import string
@@ -28,7 +28,6 @@ try:
     from celementtree.ElementTree import ElementTree
 except ImportError:
     from elementtree.ElementTree import ElementTree
-# from xml.dom.xmlbuilder import DOMBuilder, DOMInputSource
 
 VDEX_FLAT_PROFILE_TYPES = ('thesaurus', 'glossaryOrDictionary', 'flatTokenTerms')
 TRUE_VALUES = ('1', 'true', 'True', 'yes', 'Yes')
@@ -90,10 +89,6 @@ class VDEXManager(object):
         """
         if isinstance(file, StringTypes):
             file = StringIO(file)
-        #        dom = DOMBuilder();
-        #        input = DOMInputSource()
-        #        input._set_byteStream(file)
-        #        self.tree = dom.parse(input)
         try:
             self.tree = ElementTree(None, file)
         except ExpatError, e:
