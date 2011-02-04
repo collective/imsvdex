@@ -2,12 +2,15 @@ DocTest for the vdex module
 --------------------------------
 (c) 2007 by Martin Raspe (hertzhaft@biblhertz.it)
 
-    >>> from vdex import VDEXManager, VDEXError
+    >>> from imsvdex.vdex import VDEXManager, VDEXError
     >>> from StringIO import StringIO
+    >>> from os import path
+    >>> from pkg_resources import resource_filename
 
 Parse a test XML string
 
-    >>> file=open('test.xml')
+    >>> filename = resource_filename('imsvdex', path.join('tests', 'test.xml'))
+    >>> file=open(filename)
     >>> vm=VDEXManager(file)
 
     >>> vm.getVocabName()
@@ -43,7 +46,7 @@ Get it all (for Archetypes)
 
 A variant
 
-    >>> file=open('test.xml')
+    >>> file=open(filename)
 
     >>> vm=VDEXManager(file,fallback="True")
 
@@ -61,7 +64,7 @@ Don't return "(unnamed term)" for a missing term, return the caption in the defa
 
 Try to parse from a string
 
-    >>> file = open('test.xml')
+    >>> file = open(filename)
     >>> xmlstring = file.read()
     >>> vm=VDEXManager(xmlstring)
 

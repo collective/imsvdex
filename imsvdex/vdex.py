@@ -25,9 +25,9 @@ from elementtreewriter.xmlwriter import XMLWriter
 from _odict import OrderedDict
 
 try:
-    from celementtree.ElementTree import ElementTree
+    from celementtree import ElementTree
 except ImportError:
-    from elementtree.ElementTree import ElementTree
+    from elementtree import ElementTree
 
 VDEX_FLAT_PROFILE_TYPES = ('thesaurus', 'glossaryOrDictionary', 'flatTokenTerms')
 TRUE_VALUES = ('1', 'true', 'True', 'yes', 'Yes')
@@ -90,7 +90,7 @@ class VDEXManager(object):
         if isinstance(file, StringTypes):
             file = StringIO(file)
         try:
-            self.tree = ElementTree(None, file)
+            self.tree = ElementTree.ElementTree(None, file)
         except ExpatError, e:
             raise VDEXError, 'Parse error in vocabulary XML: %s' % e
         try:
@@ -314,6 +314,13 @@ class VDEXManager(object):
         """
         return self.nsTag(self.vdex_namespace, tagname)
 
+    def vdexSearchTerm(self, *tags):
+        """
+        return a Search path element with each tag of the list of
+        tags concatenated by /
+        """
+        return '/'.join([self.vdexTag(tag) for tag in tags])
+
     def makeTermDict(self):
         """
         constructs a flat dictionary of term elements, keyed by termIdentifier 
@@ -326,13 +333,155 @@ class VDEXManager(object):
             key = self.getTermIdentifier(term)
             self.term_dict[key] = term
 
-if __name__ == '__main__':
-    import doctest
-    import unittest
-    
-    suite = doctest.DocFileSuite(
-            'vdex.txt',
-            optionflags=doctest.ELLIPSIS + doctest.REPORT_ONLY_FIRST_FAILURE)
-            
-    unittest.TextTestRunner().run(suite)
+    def exportMatrix(self):
+        """
+        Return a two dimensional matrix representation of the vdex file
+        """
+        # First full iteration, get all languages
+        languages = filter(lambda x:x,set([x.attrib.get('language', '') \
+                                           for x in self.tree.findall('//*')]))
+        languages.sort()
+        depth = 0
+        rows = []
+        children_fathers_level = {}
 
+        # Second full iteration. Convert xml tree to a flat python structure
+        # Depth is maintained by an index, but parent relationships is only
+        # maintained by ordering.
+        for term in self.tree.findall('//' + self.vdexSearchTerm('term')):
+            row = {}
+            row['key'] = term.find(self.vdexSearchTerm('termIdentifier'))\
+                .text.strip()
+            captions = {}
+            descriptions = {}
+            for lang in languages:
+                captions[lang] = ""
+                descriptions[lang] = ""
+            for caption in term.findall(\
+                    self.vdexSearchTerm('caption', 'langstring')):
+                if caption.attrib.has_key('language'):
+                    captions[caption.attrib['language']] = caption.text.strip()
+            for description in term.findall(\
+                    self.vdexSearchTerm('description', 'langstring')):
+                if description.attrib.has_key('language'):
+                    descriptions[description.attrib['language']] = \
+                        description.text.strip()
+            row['captions'] = captions
+            row['descriptions'] = descriptions
+
+            # If this item is a child of something, the father must have
+            # been parsed before, and stored its level in
+            # children_fathers_level. Once for each child with the child
+            # as the key
+            father_level = children_fathers_level.get(term, -1)
+            own_level = father_level + 1
+            depth = max(own_level, depth)
+            for child_term in term.findall(self.vdexSearchTerm('term')):
+                children_fathers_level[child_term] = own_level
+            row['level'] = own_level
+            rows.append(row)
+
+        # Now that we know the maximum depth of the tree, we can build the two
+        # dimensional matrix.
+        retval_rows = []
+        header_row = ["Level %i" % x for x in range(depth+1)]
+        for lang in languages:
+            header_row.extend(['Caption %s' % lang, 'Description %s' % lang])
+        retval_rows.append(header_row)
+        for row in rows:
+            retval_row = ['' for x in range(depth + 1 + 2 * len(languages))]
+            retval_row[row['level']] = row['key']
+            for lang_count, lang in enumerate(languages):
+                offset = depth + 1
+                retval_row[offset + lang_count * 2] = row['captions'][lang]
+                retval_row[offset + lang_count * 2 + 1] = row['descriptions'][lang]
+            retval_rows.append(retval_row)
+        return retval_rows
+
+    def importMatrix(self, matrix):
+        """
+        Setup a manager based on a matrix
+        """
+        languages = []
+        state = 'Levels'
+        parents = []
+        for column, cell in enumerate(matrix[0]):
+            if not (cell.startswith('Level ')
+                 or cell.startswith('Description ')
+                 or cell.startswith('Caption ')):
+                raise AttributeError("Data is not valid, unknown header")
+            if state == 'Levels':
+                if cell.startswith('Level '):
+                    parents.append(None)
+                    continue
+                elif cell.startswith('Caption '):
+                    state = 'Caption'
+                    languages.append(cell[8:])
+                    continue
+                else:
+                    raise AttributeError("Data is not valid, after Level "
+                                         "header must come the caption")
+            elif state == 'Caption':
+                if cell.startswith('Description '):
+                    state = 'Description'
+                    continue
+                else:
+                    raise AttributeError("Data is not valid, after Caption "
+                                         "header must come the description")
+            elif state == 'Description':
+                if cell.startswith('Caption '):
+                    state = 'Caption'
+                    if not hasattr(languages, cell[8:]):
+                        languages.append(cell[8:])
+                    else:
+                        raise AttributeErro("Data is not valid, languages "
+                                            "may not appear twice!")
+                else:
+                    raise AttributeError("Data is not valid, after Description"
+                                        " must come a new Caption")
+            else:
+                raise AttributeError("Programming error, unknown state during "
+                                     "Header parsing encountered. Sorry!")
+        depth = len(parents)
+
+
+        def addSubElem(parent, elementName, text=None):
+            retval = ElementTree.SubElement(parent, self.vdexTag(elementName))
+            if text != None:
+                retval.text = text
+            return retval
+        root = ElementTree.Element(self.vdexTag('vdex'))
+        # WARNING!! We do a dirty trick here. When the first elements
+        # Want to get their root element, they have a depth of 0
+        # They will then ask for parents[0-1]. So it gets the last
+        # element. Be aware of that!
+        parents.append(root)
+        for row in matrix[1:]:
+            row_depth = None
+            for i in range(depth):
+                if row[i]:
+                    if row_depth != None:
+                        raise AttributeError("The Matrix contains an element "
+                                             "can't decide on on which level "
+                                             "it should exist")
+                    else:
+                        row_depth = i
+            parent = parents[row_depth-1]
+            term = addSubElem(parent, 'term')
+            parents[row_depth] = term
+            termIdentifier = addSubElem(term, 'termIdentifier', row[row_depth])
+            captions = [row[x] for x in range(len(parents)-1, len(row), 2)]
+            descriptions = [row[x] for x in range(len(parents), len(row), 2)]
+            if filter(lambda x:x,captions):
+                caption = addSubElem(term, 'caption')
+                for index, translation in filter(lambda (i,x):x,[x for x in enumerate(captions)]):
+                    langstring = addSubElem(caption, 'langstring', translation)
+                    langstring.attrib['language'] = languages[index]
+            if filter(lambda x:x,descriptions):
+                description = addSubElem(term, 'description')
+                for index, translation in filter(lambda i,x:x,enumerate(descriptions)):
+                    langstring = addSubElem(description, 'langstring', translation)
+                    langstring.attrib['language'] = languages[index]
+        self.tree = ElementTree.ElementTree(root)
+        self.order_significant = self.isOrderSignificant()
+        self.makeTermDict()
