@@ -13,9 +13,26 @@ class Conversions(unittest.TestCase):
     def testMatrixImport(self):
         manager = VDEXManager(resource_stream(__name__, 'test.xml'))
         matrix = manager.exportMatrix()
-        manager.importMatrix(matrix)
-        self.assertEquals(matrix, manager.exportMatrix())
+        new_manager = VDEXManager(matrix=matrix)
+        self.assertEquals(matrix, new_manager.exportMatrix())
 
-        data = manager.serialize()
+        data = new_manager.serialize()
         should_be = '<?xml version="1.0" encoding="utf-8"?>\n<vdex xmlns="http://www.imsglobal.org/xsd/imsvdex_v1p0"><term><termIdentifier>identical</termIdentifier><caption><langstring language="en">is identical with</langstring><langstring language="fr">est identique avec</langstring><langstring language="it">\xc3\xa8 identico con</langstring></caption></term><term><termIdentifier>relative</termIdentifier><caption><langstring language="de">ist verwandt mit</langstring><langstring language="en">is relative of</langstring><langstring language="fr">est parent avec</langstring><langstring language="it">\xc3\xa8 parente di</langstring></caption><term><termIdentifier>child</termIdentifier><caption><langstring language="de">ist Kind von</langstring><langstring language="en">is child of</langstring><langstring language="fr">est enfant de</langstring><langstring language="it">\xc3\xa8 prole di</langstring></caption></term></term></vdex>'
         self.assertEquals(should_be, data)
+
+    def testEmptyMatrix(self):
+        manager = VDEXManager()
+        matrix = manager.exportMatrix()
+        self.assertEquals([], matrix)
+
+    def testOldSyntax(self):
+        xml = ''
+        lang = 'de'
+        self.assertRaises(AttributeError, VDEXManager, xml, lang)
+
+    def testTooMuchInput(self):
+        manager = VDEXManager(resource_stream(__name__, 'test.xml'))
+
+        xml = manager.serialize()
+        matrix = manager.exportMatrix()
+        self.assertRaises(AttributeError, VDEXManager, xml, matrix)
