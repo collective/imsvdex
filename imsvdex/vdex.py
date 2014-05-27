@@ -269,10 +269,7 @@ class VDEXManager(object):
         """
         returns a dictionary with all translations keyed by language
         """
-        result = {}
-        for element in elements:
-            result[element.get('language')] = element.text
-        return result
+        return { element.get('language'): element.text for element in elements }
 
     def getTermById(self, identifier):
         """
