@@ -9,6 +9,7 @@ setup(name='imsvdex',
     long_description=open('README.txt').read() + "\n" +
                      open('CHANGES.txt').read(),
     classifiers=[
+          'Programming Language :: Python :: 2.7',
           # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
           'Development Status :: 5 - Production/Stable',
           'Intended Audience :: Developers',
@@ -25,8 +26,5 @@ setup(name='imsvdex',
     include_package_data=True,
     test_suite='imsvdex.tests',
     zip_safe=False,
-    install_requires=[
-        'elementtree>=1.2.6',
-        'elementtreewriter>=1.0',
-    ],
+    install_requires=['lxml',],
 )

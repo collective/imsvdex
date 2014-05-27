@@ -21,13 +21,9 @@ from types import StringTypes
 from StringIO import StringIO
 
 from xml.parsers.expat import ExpatError
-from elementtreewriter.xmlwriter import XMLWriter
-from _odict import OrderedDict
+from collections import OrderedDict
 
-try:
-    from cElementTree import parse, ElementTree, SubElement, Element
-except ImportError:
-    from elementtree.ElementTree import parse, ElementTree, SubElement, Element
+from lxml import etree
 
 VDEX_FLAT_PROFILE_TYPES = ('thesaurus', 'glossaryOrDictionary', 'flatTokenTerms')
 TRUE_VALUES = ('1', 'true', 'True', 'yes', 'Yes')
@@ -119,7 +115,7 @@ class VDEXManager(object):
         if isinstance(file, StringTypes):
             file = StringIO(file)
         try:
-            self.tree = parse(file)
+            self.tree = etree.parse(file)
         except (SyntaxError, ExpatError), e:
             raise VDEXError, 'Parse error in vocabulary XML: %s' % e
         try:
@@ -136,10 +132,7 @@ class VDEXManager(object):
         """
         returns the vocabulary as XML
         """
-        if file is None:
-            file = StringIO()
-        writer = XMLWriter(self.tree)
-        return writer(file)
+        return etree.tostring(self.tree, encoding='utf-8', standalone=True)
 
     def getVocabIdentifier(self):
         """
@@ -477,11 +470,11 @@ class VDEXManager(object):
 
 
         def addSubElem(parent, elementName, text=None):
-            retval = SubElement(parent, self.vdexTag(elementName))
+            retval = etree.SubElement(parent, self.vdexTag(elementName))
             if text != None:
                 retval.text = text
             return retval
-        root = Element(self.vdexTag('vdex'))
+        root = etree.Element(self.vdexTag('vdex'), nsmap={None: self.vdex_namespace})
         # WARNING!! We do a dirty trick here. When the first elements
         # Want to get their root element, they have a depth of 0
         # They will then ask for parents[0-1]. So it gets the last
@@ -513,6 +506,6 @@ class VDEXManager(object):
                 for index, translation in filter(lambda (i,x):x,[x for x in enumerate(descriptions)]):
                     langstring = addSubElem(description, 'langstring', translation)
                     langstring.attrib['language'] = languages[index]
-        self.tree = ElementTree(root)
+        self.tree = etree.ElementTree(root)
         self.order_significant = self.isOrderSignificant()
         self.makeTermDict()

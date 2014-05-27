@@ -5,6 +5,9 @@ Changes
 2.0a1 - (Unreleased)
 --------------------
 
+- Use lxml instead of elementtree
+  [tomgross]
+
 - Adding posibility to generate vdex from a twodimension matrix, and
   corresponding export functionality.
   WARNING: The constructor arguments changed. Please update accordingly
