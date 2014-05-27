@@ -26,7 +26,6 @@ from collections import OrderedDict
 from lxml import etree
 
 VDEX_FLAT_PROFILE_TYPES = ('thesaurus', 'glossaryOrDictionary', 'flatTokenTerms')
-TRUE_VALUES = ('1', 'true', 'True', 'yes', 'Yes')
 FALSE_VALUES = ('', '0', 'false', 'False', 'no', 'No')
 
 class VDEXError(Exception):
@@ -182,7 +181,7 @@ class VDEXManager(object):
         """
         this is not declared in VDEX vocabs, so we return false
         """
-        return false
+        return False
 
     def getVocabularyDict(self, lang=None):
         """
@@ -313,7 +312,7 @@ class VDEXManager(object):
 	    # not needed here
         if not nsname[:1] == "{":
             return nsname
-        namespace_uri, tagname = string.split(name[1:], "}", 1)
+        namespace_uri, tagname = string.split(nsname[1:], "}", 1)
         return tagname
 
     def nsTag(self, namespace, tagname):
@@ -455,8 +454,8 @@ class VDEXManager(object):
                     if not hasattr(languages, cell[8:]):
                         languages.append(cell[8:])
                     else:
-                        raise AttributeErro("Data is not valid, languages "
-                                            "may not appear twice!")
+                        raise AttributeError("Data is not valid, languages "
+                                             "may not appear twice!")
                 else:
                     raise AttributeError("Data is not valid, after Description"
                                         " must come a new Caption")
@@ -490,7 +489,7 @@ class VDEXManager(object):
             parent = parents[row_depth-1]
             term = addSubElem(parent, 'term')
             parents[row_depth] = term
-            termIdentifier = addSubElem(term, 'termIdentifier', row[row_depth])
+            addSubElem(term, 'termIdentifier', row[row_depth])
             captions = [row[x] for x in range(len(parents)-1, len(row), 2)]
             descriptions = [row[x] for x in range(len(parents), len(row), 2)]
             if filter(lambda x:x,captions):
