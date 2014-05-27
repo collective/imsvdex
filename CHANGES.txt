@@ -2,7 +2,7 @@
 Changes
 *******
 
-1.0-FHNW1 (2014-05-27)
+2.0 (unreleased)
 ----------------------
 
 - Use lxml instead of elementtree
