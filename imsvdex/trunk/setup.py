@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '2.0a1'
+version = '1.0-FHNW1'
 
 setup(name='imsvdex',
     version=version,
