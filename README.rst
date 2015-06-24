@@ -18,7 +18,7 @@ format::
     networks of relationship to be expressed if required [CITVDEXSITE]_.
 
 
-.. [CITVDEXSITE] citation from IMS Global, the VDEX-specification-page_.
+.. _[CITVDEXSITE] citation from IMS Global, the VDEX-specification-page_.
 
 .. _VDEX-specification-page: http://www.imsglobal.org/vdex
 
