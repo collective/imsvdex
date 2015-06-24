@@ -6,7 +6,7 @@ version = '2.0.dev0'
 setup(name='imsvdex',
     version=version,
     description="Read/write vocabularies in IMS Vocabulary Definition Exchange format.",
-    long_description=open('README.txt').read() + "\n" +
+    long_description=open('README.rst').read() + "\n" +
                      open('CHANGES.txt').read(),
     classifiers=[
           'Programming Language :: Python :: 2.7',

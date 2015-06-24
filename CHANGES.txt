@@ -2,7 +2,7 @@
 Changes
 *******
 
-2.0 (unreleased)
+1.1 (unreleased)
 ----------------------
 
 - Use lxml instead of elementtree
