@@ -15,11 +15,11 @@ format::
     and ADL SCORM, etc, for example. In these cases, the terms are often not human
     language words or phrases but more abstract tokens. VDEX can also express
     strictly hierarchical schemes in a compact manner while allowing for more loose
-    networks of relationship to be expressed if required [CITVDEXSITE]_.
+    networks of relationship to be expressed if required.
 
+[CITVDEXSITE].
 
-.. _[CITVDEXSITE]: citation from IMS Global, the VDEX-specification-page_.
-
+.. [CITVDEXSITE] citation from IMS Global, the VDEX-specification-page_
 .. _VDEX-specification-page: http://www.imsglobal.org/vdex
 
 This module takes the VDEX-XML objects and offers an API to them.
