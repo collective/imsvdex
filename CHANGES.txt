@@ -2,8 +2,8 @@
 Changes
 *******
 
-1.1 (unreleased)
-----------------------
+1.1 (2015-06-25)
+----------------
 
 - Use lxml instead of elementtree
   [tomgross]
