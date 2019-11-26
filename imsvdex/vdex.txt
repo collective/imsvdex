@@ -1,5 +1,6 @@
 DocTest for the vdex module
---------------------------------
+---------------------------
+
 (c) 2007 by Martin Raspe (hertzhaft@biblhertz.it)
 
     >>> from imsvdex.vdex import VDEXManager, VDEXError
@@ -33,16 +34,36 @@ Parse a test XML string
 
 For lang='*' return a dictionary with all translations keyed by language
 
-    >>> vm.getTermCaptionById('relative',lang='*')
-    {'fr': 'est parent avec', 'de': 'ist verwandt mit', 'en': 'is relative of', 'it': u'\xe8 parente di'}
+    >>> term = vm.getTermCaptionById('relative',lang='*')
+    >>> len(term.keys())
+    4
+
+    >>> term['fr']
+    'est parent avec'
+
+    >>> term['de']
+    'ist verwandt mit'
+
+    >>> term['en']
+    'is relative of'
+
+    >>> term['it']
+    u'\xe8 parente di'
 
     >>> vm.getTermDescriptionById('relative',lang='*')
     {}
 
 Get it all (for Archetypes)
 
-    >>> vm.getVocabularyDict(lang='de')
-    {'identical': ('(unnamed term)', None), 'relative': ('ist verwandt mit', {'child': ('ist Kind von', None)})}
+    >>> term = vm.getVocabularyDict(lang='de')
+    >>> len(term.keys())
+    2
+
+    >>> term['identical']
+    ('(unnamed term)', None)
+
+    >>> term['relative']
+    ('ist verwandt mit', {'child': ('ist Kind von', None)})
 
 A variant
 

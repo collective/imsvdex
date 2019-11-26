@@ -16,9 +16,10 @@
 __author__ = "Martin Raspe, Jens Klein"
 __docformat__ = "plaintext"
 
+from . import safe_text
 from collections import OrderedDict
+from io import StringIO
 from lxml import etree
-from StringIO import StringIO
 from types import StringTypes
 from xml.parsers.expat import ExpatError
 
@@ -120,7 +121,7 @@ class VDEXManager(object):
         parses a VDEX vocabulary file or XML string
         """
         if isinstance(file, StringTypes):
-            file = StringIO(file)
+            file = StringIO(safe_text(file))
         try:
             self.tree = etree.parse(file)
         except (SyntaxError, ExpatError) as e:
@@ -228,7 +229,7 @@ class VDEXManager(object):
     def getTermCaption(self, term, lang=None):
         """
         returns the translated caption for a term
-          for lang == "*" the method returns a dictionary with all translations 
+          for lang == "*" the method returns a dictionary with all translations
           keyed by language
         """
         if term is None:
@@ -240,7 +241,7 @@ class VDEXManager(object):
     def getTermDescription(self, term, lang=None):
         """
         returns the translated description for a term
-          for lang == "*" the method returns a dictionary with all translations 
+          for lang == "*" the method returns a dictionary with all translations
           keyed by language
         """
         if term is None:
@@ -252,7 +253,7 @@ class VDEXManager(object):
     def getLangstring(self, elements, lang=None, default=None):
         """
         returns the langstring in the given language.
-        for lang == "*" the method returns a dictionary with all translations 
+        for lang == "*" the method returns a dictionary with all translations
         keyed by language
         """
         if lang == "*":
@@ -349,7 +350,7 @@ class VDEXManager(object):
 
     def makeTermDict(self):
         """
-        constructs a flat dictionary of term elements, keyed by termIdentifier 
+        constructs a flat dictionary of term elements, keyed by termIdentifier
         """
         # the .// prefix finds all items recursively
         xpath = ".//" + self.vdexTag("term")
@@ -387,12 +388,12 @@ class VDEXManager(object):
                 captions[lang] = ""
                 descriptions[lang] = ""
             for caption in term.findall(self.vdexSearchTerm("caption", "langstring")):
-                if caption.attrib.has_key("language"):
+                if "language" in caption.attrib:
                     captions[caption.attrib["language"]] = caption.text.strip()
             for description in term.findall(
                 self.vdexSearchTerm("description", "langstring")
             ):
-                if description.attrib.has_key("language"):
+                if "language" in description.attrib:
                     descriptions[description.attrib["language"]] = (
                         description.text and description.text.strip() or ""
                     )
@@ -486,7 +487,7 @@ class VDEXManager(object):
 
         def addSubElem(parent, elementName, text=None):
             retval = etree.SubElement(parent, self.vdexTag(elementName))
-            if text != None:
+            if text is not None:
                 retval.text = text
             return retval
 
@@ -500,7 +501,7 @@ class VDEXManager(object):
             row_depth = None
             for i in range(depth):
                 if row[i]:
-                    if row_depth != None:
+                    if row_depth is not None:
                         raise AttributeError(
                             "The Matrix contains an element "
                             "can't decide on on which level "
@@ -512,22 +513,21 @@ class VDEXManager(object):
             term = addSubElem(parent, "term")
             parents[row_depth] = term
             addSubElem(term, "termIdentifier", row[row_depth])
-            captions = [row[x] for x in range(len(parents) - 1, len(row), 2)]
-            descriptions = [row[x] for x in range(len(parents), len(row), 2)]
-            if filter(lambda x: x, captions):
+            captions = filter(None, [row[x] for x in range(len(parents) - 1, len(row), 2)])
+            descriptions = filter(None, [row[x] for x in range(len(parents), len(row), 2)])
+
+            if captions:
                 caption = addSubElem(term, "caption")
-                for index, translation in filter(
-                    lambda (i, x): x, [x for x in enumerate(captions)]
-                ):
+                for index, translation in enumerate(captions):
                     langstring = addSubElem(caption, "langstring", translation)
                     langstring.attrib["language"] = languages[index]
-            if filter(lambda x: x, descriptions):
+
+            if descriptions:
                 description = addSubElem(term, "description")
-                for index, translation in filter(
-                    lambda (i, x): x, [x for x in enumerate(descriptions)]
-                ):
+                for index, translation in enumerate(descriptions):
                     langstring = addSubElem(description, "langstring", translation)
                     langstring.attrib["language"] = languages[index]
+
         self.tree = etree.ElementTree(root)
         self.order_significant = self.isOrderSignificant()
         self.makeTermDict()
