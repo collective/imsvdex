@@ -7,31 +7,33 @@
 #
 # German Free Software License (D-FSL)
 #
-# This Program may be used by anyone in accordance with the terms of the 
+# This Program may be used by anyone in accordance with the terms of the
 # German Free Software License
 # The License may be obtained under <http://www.d-fsl.org>.
 
 #
 
-__author__ = 'Martin Raspe, Jens Klein'
-__docformat__ = 'plaintext'
+__author__ = "Martin Raspe, Jens Klein"
+__docformat__ = "plaintext"
+
+from collections import OrderedDict
+from lxml import etree
+from StringIO import StringIO
+from types import StringTypes
+from xml.parsers.expat import ExpatError
 
 import string
-from types import StringTypes
-from StringIO import StringIO
 
-from xml.parsers.expat import ExpatError
-from collections import OrderedDict
 
-from lxml import etree
+VDEX_FLAT_PROFILE_TYPES = ("thesaurus", "glossaryOrDictionary", "flatTokenTerms")
+FALSE_VALUES = ("", "0", "false", "False", "no", "No")
 
-VDEX_FLAT_PROFILE_TYPES = ('thesaurus', 'glossaryOrDictionary', 'flatTokenTerms')
-FALSE_VALUES = ('', '0', 'false', 'False', 'no', 'No')
 
 class VDEXError(Exception):
     """
     Denotes an error while handling an IMS-VDEX vocabulary with a VDEXManager
     """
+
 
 class VDEXManager(object):
     """
@@ -61,14 +63,16 @@ class VDEXManager(object):
     call the exportMatrix method.
     """
 
-    vdex_namespace = 'http://www.imsglobal.org/xsd/imsvdex_v1p0'
-    default_language = 'en'
-    unnamed_term = '(unnamed term)'
+    vdex_namespace = "http://www.imsglobal.org/xsd/imsvdex_v1p0"
+    default_language = "en"
+    unnamed_term = "(unnamed term)"
     fallback_to_default_language = False
     order_significant = False
     term_dict = {}
 
-    def __init__(self, file=None, matrix=None, lang=None, namespace=None, fallback=None):
+    def __init__(
+        self, file=None, matrix=None, lang=None, namespace=None, fallback=None
+    ):
         """
         constructs a VDEX manager and parses a XML vocabulary
 		file: a file or string that is parsed
@@ -81,9 +85,11 @@ class VDEXManager(object):
           or as self.unnamed_term ?
         """
         if isinstance(matrix, basestring):
-            raise AttributeError("This is the new imsvdex version. You "
-                                 "tried to pass the default language as "
-                                 "the matrix. Consider to use named arguments")
+            raise AttributeError(
+                "This is the new imsvdex version. You "
+                "tried to pass the default language as "
+                "the matrix. Consider to use named arguments"
+            )
         if lang is not None:
             self.default_language = lang
         if namespace is not None:
@@ -95,17 +101,19 @@ class VDEXManager(object):
         if file is not None:
             self.parse(file)
         if file and matrix:
-            raise AttributeError("You gave me a a matrix and a file, it is "
-                                 "not defined what takes precedence. You may "
-                                 "only set one of the two parameters")
+            raise AttributeError(
+                "You gave me a a matrix and a file, it is "
+                "not defined what takes precedence. You may "
+                "only set one of the two parameters"
+            )
 
     def isVDEX(self):
         """
         checks if the parsed XML seems to be a valid VDEX vocabulary
         """
         # this method does not perform a complete schema validation
-		# it just checks for a root element named 'vdex' in the expected  namespace
-        return self.tree.getroot().tag == self.vdexTag('vdex')
+        # it just checks for a root element named 'vdex' in the expected  namespace
+        return self.tree.getroot().tag == self.vdexTag("vdex")
 
     def parse(self, file):
         """
@@ -115,14 +123,14 @@ class VDEXManager(object):
             file = StringIO(file)
         try:
             self.tree = etree.parse(file)
-        except (SyntaxError, ExpatError), e:
-            raise VDEXError, 'Parse error in vocabulary XML: %s' % e
+        except (SyntaxError, ExpatError) as e:
+            raise VDEXError("Parse error in vocabulary XML: %s" % e)
         try:
             filename = file.name
         except AttributeError:
-            filename = 'parsed XML text'
+            filename = "parsed XML text"
         if not self.isVDEX():
-            raise VDEXError, 'Vocabulary format not correct in %s' % filename
+            raise VDEXError("Vocabulary format not correct in %s" % filename)
         self.order_significant = self.isOrderSignificant()
         self.makeTermDict()
         return self.tree
@@ -131,13 +139,13 @@ class VDEXManager(object):
         """
         returns the vocabulary as XML
         """
-        return etree.tostring(self.tree, encoding='utf-8', standalone=True)
+        return etree.tostring(self.tree, encoding="utf-8", standalone=True)
 
     def getVocabIdentifier(self):
         """
         returns the vocabulary identifier
         """
-        xpath = self.vdexTag('vocabIdentifier')
+        xpath = self.vdexTag("vocabIdentifier")
         return self.tree.findtext(xpath)
 
     def getVocabName(self, lang=None):
@@ -145,15 +153,15 @@ class VDEXManager(object):
         returns the vocabulary name in the given (or default) language.
         If lang is '*', returns a dict of all translations keyed by language
         """
-        xpath = '%s/%s' % (self.vdexTag('vocabName'), self.vdexTag('langstring'))
+        xpath = "%s/%s" % (self.vdexTag("vocabName"), self.vdexTag("langstring"))
         captions = self.tree.findall(xpath)
-        return self.getLangstring(captions, lang, default='(unnamed vocabulary)')
+        return self.getLangstring(captions, lang, default="(unnamed vocabulary)")
 
     def getVocabMetadata(self):
         """
         returns the VDEX metadata element(s) for the Vocabulary
         """
-        xpath = self.vdexTag('metadata')
+        xpath = self.vdexTag("metadata")
         return self.tree.getroot().findall(xpath)
 
     def getVocabWildcard(self, foreign_ns, tagname):
@@ -166,16 +174,16 @@ class VDEXManager(object):
     def isFlat(self):
         """
         returns true if the VDEX profile type denotes a flat vocabulary
-        """ 
+        """
         vdex = self.tree.getroot()
-        return vdex.get('profileType') in VDEX_FLAT_PROFILE_TYPES
+        return vdex.get("profileType") in VDEX_FLAT_PROFILE_TYPES
 
     def isOrderSignificant(self):
         """
         returns true if the order of the VDEX vocabulary is significant
-        """ 
+        """
         vdex = self.tree.getroot()
-        return vdex.get('orderSignificant') not in FALSE_VALUES
+        return vdex.get("orderSignificant") not in FALSE_VALUES
 
     def showLeafsOnly(self):
         """
@@ -195,7 +203,7 @@ class VDEXManager(object):
         get all term elements recursively
           returns a hierarchic dictionary structure of the vocabulary
         """
-        xpath = self.vdexTag('term')
+        xpath = self.vdexTag("term")
         terms = element.findall(xpath)
         if len(terms) == 0:
             return None
@@ -214,7 +222,7 @@ class VDEXManager(object):
         """
         returns the termIdentifier for a given term element
         """
-        xpath = self.vdexTag('termIdentifier')
+        xpath = self.vdexTag("termIdentifier")
         return term.findtext(xpath)
 
     def getTermCaption(self, term, lang=None):
@@ -225,7 +233,7 @@ class VDEXManager(object):
         """
         if term is None:
             return None
-        xpath = '%s/%s' % (self.vdexTag('caption'), self.vdexTag('langstring'))
+        xpath = "%s/%s" % (self.vdexTag("caption"), self.vdexTag("langstring"))
         captions = term.findall(xpath)
         return self.getLangstring(captions, lang)
 
@@ -237,9 +245,9 @@ class VDEXManager(object):
         """
         if term is None:
             return None
-        xpath = '%s/%s' % (self.vdexTag('description'), self.vdexTag('langstring'))
+        xpath = "%s/%s" % (self.vdexTag("description"), self.vdexTag("langstring"))
         descriptions = term.findall(xpath)
-        return self.getLangstring(descriptions, lang, default='')
+        return self.getLangstring(descriptions, lang, default="")
 
     def getLangstring(self, elements, lang=None, default=None):
         """
@@ -247,7 +255,7 @@ class VDEXManager(object):
         for lang == "*" the method returns a dictionary with all translations 
         keyed by language
         """
-        if lang == '*':
+        if lang == "*":
             return self.getAllLangstrings(elements)
         if lang is None:
             lang = self.default_language
@@ -255,10 +263,10 @@ class VDEXManager(object):
             default = self.unnamed_term
         result = None
         for element in elements:
-            if element.get('language') == lang:
+            if element.get("language") == lang:
                 result = element.text
             if self.fallback_to_default_language:
-               if element.get('language') == self.default_language:
+                if element.get("language") == self.default_language:
                     default = element.text
         if result is None:
             result = default
@@ -268,7 +276,7 @@ class VDEXManager(object):
         """
         returns a dictionary with all translations keyed by language
         """
-        return { element.get('language'): element.text for element in elements }
+        return {element.get("language"): element.text for element in elements}
 
     def getTermById(self, identifier):
         """
@@ -296,7 +304,7 @@ class VDEXManager(object):
           for a given term identifier
         """
         term = self.getTermById(identifier)
-        xpath = self.vdexTag('metadata')
+        xpath = self.vdexTag("metadata")
         return term.findall(xpath)
 
     def getTermWildcardById(self, identifier, namespace, tagname):
@@ -309,7 +317,7 @@ class VDEXManager(object):
         return term.findall(xpath)
 
     def getTagname(self, nsname):
-	    # not needed here
+        # not needed here
         if not nsname[:1] == "{":
             return nsname
         namespace_uri, tagname = string.split(nsname[1:], "}", 1)
@@ -320,10 +328,10 @@ class VDEXManager(object):
         returns a tag with a namespace of the form '{namespace_uri}tagname'
           or just the tag name if an empty namespace was given
         """
-        if namespace == '':
+        if namespace == "":
             return tagname
         else:
-            return '{%s}%s' % (namespace, tagname)
+            return "{%s}%s" % (namespace, tagname)
 
     def vdexTag(self, tagname):
         """
@@ -337,14 +345,14 @@ class VDEXManager(object):
         return a Search path element with each tag of the list of
         tags concatenated by /
         """
-        return '/'.join([self.vdexTag(tag) for tag in tags])
+        return "/".join([self.vdexTag(tag) for tag in tags])
 
     def makeTermDict(self):
         """
         constructs a flat dictionary of term elements, keyed by termIdentifier 
         """
         # the .// prefix finds all items recursively
-        xpath = './/' + self.vdexTag('term')
+        xpath = ".//" + self.vdexTag("term")
         terms = self.tree.getroot().findall(xpath)
         self.term_dict = {}
         for term in terms:
@@ -356,10 +364,12 @@ class VDEXManager(object):
         Return a two dimensional matrix representation of the vdex file
         """
         # First full iteration, get all languages
-        if not hasattr(self, 'tree'):
+        if not hasattr(self, "tree"):
             return []
-        languages = filter(lambda x:x,set([x.attrib.get('language', '') \
-                                           for x in self.tree.findall('//*')]))
+        languages = filter(
+            lambda x: x,
+            set([x.attrib.get("language", "") for x in self.tree.findall("//*")]),
+        )
         languages.sort()
         depth = 0
         rows = []
@@ -368,26 +378,26 @@ class VDEXManager(object):
         # Second full iteration. Convert xml tree to a flat python structure
         # Depth is maintained by an index, but parent relationships is only
         # maintained by ordering.
-        for term in self.tree.findall('//' + self.vdexSearchTerm('term')):
+        for term in self.tree.findall("//" + self.vdexSearchTerm("term")):
             row = {}
-            row['key'] = term.find(self.vdexSearchTerm('termIdentifier'))\
-                .text.strip()
+            row["key"] = term.find(self.vdexSearchTerm("termIdentifier")).text.strip()
             captions = {}
             descriptions = {}
             for lang in languages:
                 captions[lang] = ""
                 descriptions[lang] = ""
-            for caption in term.findall(\
-                    self.vdexSearchTerm('caption', 'langstring')):
-                if caption.attrib.has_key('language'):
-                    captions[caption.attrib['language']] = caption.text.strip()
-            for description in term.findall(\
-                    self.vdexSearchTerm('description', 'langstring')):
-                if description.attrib.has_key('language'):
-                    descriptions[description.attrib['language']] = \
-                        description.text and description.text.strip() or ''
-            row['captions'] = captions
-            row['descriptions'] = descriptions
+            for caption in term.findall(self.vdexSearchTerm("caption", "langstring")):
+                if caption.attrib.has_key("language"):
+                    captions[caption.attrib["language"]] = caption.text.strip()
+            for description in term.findall(
+                self.vdexSearchTerm("description", "langstring")
+            ):
+                if description.attrib.has_key("language"):
+                    descriptions[description.attrib["language"]] = (
+                        description.text and description.text.strip() or ""
+                    )
+            row["captions"] = captions
+            row["descriptions"] = descriptions
 
             # If this item is a child of something, the father must have
             # been parsed before, and stored its level in
@@ -396,25 +406,25 @@ class VDEXManager(object):
             father_level = children_fathers_level.get(term, -1)
             own_level = father_level + 1
             depth = max(own_level, depth)
-            for child_term in term.findall(self.vdexSearchTerm('term')):
+            for child_term in term.findall(self.vdexSearchTerm("term")):
                 children_fathers_level[child_term] = own_level
-            row['level'] = own_level
+            row["level"] = own_level
             rows.append(row)
 
         # Now that we know the maximum depth of the tree, we can build the two
         # dimensional matrix.
         retval_rows = []
-        header_row = ["Level %i" % x for x in range(depth+1)]
+        header_row = ["Level %i" % x for x in range(depth + 1)]
         for lang in languages:
-            header_row.extend(['Caption %s' % lang, 'Description %s' % lang])
+            header_row.extend(["Caption %s" % lang, "Description %s" % lang])
         retval_rows.append(header_row)
         for row in rows:
-            retval_row = ['' for x in range(depth + 1 + 2 * len(languages))]
-            retval_row[row['level']] = row['key']
+            retval_row = ["" for x in range(depth + 1 + 2 * len(languages))]
+            retval_row[row["level"]] = row["key"]
             for lang_count, lang in enumerate(languages):
                 offset = depth + 1
-                retval_row[offset + lang_count * 2] = row['captions'][lang]
-                retval_row[offset + lang_count * 2 + 1] = row['descriptions'][lang]
+                retval_row[offset + lang_count * 2] = row["captions"][lang]
+                retval_row[offset + lang_count * 2 + 1] = row["descriptions"][lang]
             retval_rows.append(retval_row)
         return retval_rows
 
@@ -423,54 +433,64 @@ class VDEXManager(object):
         Setup a manager based on a matrix
         """
         languages = []
-        state = 'Levels'
+        state = "Levels"
         parents = []
         for column, cell in enumerate(matrix[0]):
-            if not (cell.startswith('Level ')
-                 or cell.startswith('Description ')
-                 or cell.startswith('Caption ')):
+            if not (
+                cell.startswith("Level ")
+                or cell.startswith("Description ")
+                or cell.startswith("Caption ")
+            ):
                 raise AttributeError("Data is not valid, unknown header")
-            if state == 'Levels':
-                if cell.startswith('Level '):
+            if state == "Levels":
+                if cell.startswith("Level "):
                     parents.append(None)
                     continue
-                elif cell.startswith('Caption '):
-                    state = 'Caption'
+                elif cell.startswith("Caption "):
+                    state = "Caption"
                     languages.append(cell[8:])
                     continue
                 else:
-                    raise AttributeError("Data is not valid, after Level "
-                                         "header must come the caption")
-            elif state == 'Caption':
-                if cell.startswith('Description '):
-                    state = 'Description'
+                    raise AttributeError(
+                        "Data is not valid, after Level " "header must come the caption"
+                    )
+            elif state == "Caption":
+                if cell.startswith("Description "):
+                    state = "Description"
                     continue
                 else:
-                    raise AttributeError("Data is not valid, after Caption "
-                                         "header must come the description")
-            elif state == 'Description':
-                if cell.startswith('Caption '):
-                    state = 'Caption'
+                    raise AttributeError(
+                        "Data is not valid, after Caption "
+                        "header must come the description"
+                    )
+            elif state == "Description":
+                if cell.startswith("Caption "):
+                    state = "Caption"
                     if not hasattr(languages, cell[8:]):
                         languages.append(cell[8:])
                     else:
-                        raise AttributeError("Data is not valid, languages "
-                                             "may not appear twice!")
+                        raise AttributeError(
+                            "Data is not valid, languages " "may not appear twice!"
+                        )
                 else:
-                    raise AttributeError("Data is not valid, after Description"
-                                        " must come a new Caption")
+                    raise AttributeError(
+                        "Data is not valid, after Description"
+                        " must come a new Caption"
+                    )
             else:
-                raise AttributeError("Programming error, unknown state during "
-                                     "Header parsing encountered. Sorry!")
+                raise AttributeError(
+                    "Programming error, unknown state during "
+                    "Header parsing encountered. Sorry!"
+                )
         depth = len(parents)
-
 
         def addSubElem(parent, elementName, text=None):
             retval = etree.SubElement(parent, self.vdexTag(elementName))
             if text != None:
                 retval.text = text
             return retval
-        root = etree.Element(self.vdexTag('vdex'), nsmap={None: self.vdex_namespace})
+
+        root = etree.Element(self.vdexTag("vdex"), nsmap={None: self.vdex_namespace})
         # WARNING!! We do a dirty trick here. When the first elements
         # Want to get their root element, they have a depth of 0
         # They will then ask for parents[0-1]. So it gets the last
@@ -481,27 +501,33 @@ class VDEXManager(object):
             for i in range(depth):
                 if row[i]:
                     if row_depth != None:
-                        raise AttributeError("The Matrix contains an element "
-                                             "can't decide on on which level "
-                                             "it should exist")
+                        raise AttributeError(
+                            "The Matrix contains an element "
+                            "can't decide on on which level "
+                            "it should exist"
+                        )
                     else:
                         row_depth = i
-            parent = parents[row_depth-1]
-            term = addSubElem(parent, 'term')
+            parent = parents[row_depth - 1]
+            term = addSubElem(parent, "term")
             parents[row_depth] = term
-            addSubElem(term, 'termIdentifier', row[row_depth])
-            captions = [row[x] for x in range(len(parents)-1, len(row), 2)]
+            addSubElem(term, "termIdentifier", row[row_depth])
+            captions = [row[x] for x in range(len(parents) - 1, len(row), 2)]
             descriptions = [row[x] for x in range(len(parents), len(row), 2)]
-            if filter(lambda x:x,captions):
-                caption = addSubElem(term, 'caption')
-                for index, translation in filter(lambda (i,x):x,[x for x in enumerate(captions)]):
-                    langstring = addSubElem(caption, 'langstring', translation)
-                    langstring.attrib['language'] = languages[index]
-            if filter(lambda x:x,descriptions):
-                description = addSubElem(term, 'description')
-                for index, translation in filter(lambda (i,x):x,[x for x in enumerate(descriptions)]):
-                    langstring = addSubElem(description, 'langstring', translation)
-                    langstring.attrib['language'] = languages[index]
+            if filter(lambda x: x, captions):
+                caption = addSubElem(term, "caption")
+                for index, translation in filter(
+                    lambda (i, x): x, [x for x in enumerate(captions)]
+                ):
+                    langstring = addSubElem(caption, "langstring", translation)
+                    langstring.attrib["language"] = languages[index]
+            if filter(lambda x: x, descriptions):
+                description = addSubElem(term, "description")
+                for index, translation in filter(
+                    lambda (i, x): x, [x for x in enumerate(descriptions)]
+                ):
+                    langstring = addSubElem(description, "langstring", translation)
+                    langstring.attrib["language"] = languages[index]
         self.tree = etree.ElementTree(root)
         self.order_significant = self.isOrderSignificant()
         self.makeTermDict()
