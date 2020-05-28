@@ -4,7 +4,7 @@ DocTest for the vdex module
 (c) 2007 by Martin Raspe (hertzhaft@biblhertz.it)
 
     >>> from imsvdex.vdex import VDEXManager, VDEXError
-    >>> from StringIO import StringIO
+    >>> from io import StringIO
     >>> from os import path
     >>> from pkg_resources import resource_filename
 
@@ -48,7 +48,7 @@ For lang='*' return a dictionary with all translations keyed by language
     'is relative of'
 
     >>> term['it']
-    u'\xe8 parente di'
+    'è parente di'
 
     >>> vm.getTermDescriptionById('relative',lang='*')
     {}

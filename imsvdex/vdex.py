@@ -16,11 +16,9 @@
 __author__ = "Martin Raspe, Jens Klein"
 __docformat__ = "plaintext"
 
-from . import safe_text
 from collections import OrderedDict
-from io import StringIO
+from io import BytesIO
 from lxml import etree
-from types import StringTypes
 from xml.parsers.expat import ExpatError
 
 import string
@@ -85,7 +83,7 @@ class VDEXManager(object):
           should the term be returned in the default language
           or as self.unnamed_term ?
         """
-        if isinstance(matrix, basestring):
+        if isinstance(matrix, str):
             raise AttributeError(
                 "This is the new imsvdex version. You "
                 "tried to pass the default language as "
@@ -120,8 +118,8 @@ class VDEXManager(object):
         """
         parses a VDEX vocabulary file or XML string
         """
-        if isinstance(file, StringTypes):
-            file = StringIO(safe_text(file))
+        if isinstance(file, str):
+            file = BytesIO(file.encode("utf-8"))
         try:
             self.tree = etree.parse(file)
         except (SyntaxError, ExpatError) as e:
@@ -140,7 +138,9 @@ class VDEXManager(object):
         """
         returns the vocabulary as XML
         """
-        return etree.tostring(self.tree, encoding="utf-8", standalone=True)
+        return etree.tostring(self.tree, encoding="utf-8", standalone=True).decode(
+            "utf-8"
+        )
 
     def getVocabIdentifier(self):
         """
@@ -367,11 +367,12 @@ class VDEXManager(object):
         # First full iteration, get all languages
         if not hasattr(self, "tree"):
             return []
-        languages = filter(
-            lambda x: x,
-            set([x.attrib.get("language", "") for x in self.tree.findall("//*")]),
+        languages = sorted(
+            filter(
+                lambda x: x,
+                set([x.attrib.get("language", "") for x in self.tree.findall("//*")]),
+            )
         )
-        languages.sort()
         depth = 0
         rows = []
         children_fathers_level = {}
@@ -513,18 +514,22 @@ class VDEXManager(object):
             term = addSubElem(parent, "term")
             parents[row_depth] = term
             addSubElem(term, "termIdentifier", row[row_depth])
-            captions = filter(None, [row[x] for x in range(len(parents) - 1, len(row), 2)])
-            descriptions = filter(None, [row[x] for x in range(len(parents), len(row), 2)])
+            captions = [row[x] for x in range(len(parents) - 1, len(row), 2)]
+            descriptions = [row[x] for x in range(len(parents), len(row), 2)]
 
-            if captions:
+            if any(captions):
                 caption = addSubElem(term, "caption")
                 for index, translation in enumerate(captions):
+                    if not translation:
+                        continue
                     langstring = addSubElem(caption, "langstring", translation)
                     langstring.attrib["language"] = languages[index]
 
-            if descriptions:
+            if any(descriptions):
                 description = addSubElem(term, "description")
                 for index, translation in enumerate(descriptions):
+                    if not translation:
+                        continue
                     langstring = addSubElem(description, "langstring", translation)
                     langstring.attrib["language"] = languages[index]
 
