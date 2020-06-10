@@ -4,8 +4,14 @@ Changes
 
 1.2 (unreleased)
 ----------------
+- Python 3 support.
+  [ale-rt, reinhardt, thet]
+  
+- Add tox/travis testing environment.
+  [thet]
 
 - Cleanup/Blacken codebase.
+  [thet]
 
 
 1.1 (2015-06-25)
