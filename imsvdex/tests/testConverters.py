@@ -9,7 +9,8 @@ import unittest
 
 class Conversions(unittest.TestCase):
     def testMatrixExport(self):
-        manager = VDEXManager(resource_stream(__name__, "test.xml"))
+        with resource_stream(__name__, "test.xml") as f:
+            manager = VDEXManager(f)
         data = manager.exportMatrix()
         should_be = [
             [
@@ -64,7 +65,8 @@ class Conversions(unittest.TestCase):
         self.assertEquals(should_be, data)
 
     def testMatrixImport(self):
-        manager = VDEXManager(resource_stream(__name__, "test.xml"))
+        with resource_stream(__name__, "test.xml") as f:
+            manager = VDEXManager(f)
         matrix = manager.exportMatrix()
         new_manager = VDEXManager(matrix=matrix)
         self.assertEquals(matrix, new_manager.exportMatrix())
@@ -86,7 +88,8 @@ class Conversions(unittest.TestCase):
         self.assertRaises(AttributeError, VDEXManager, xml, lang)
 
     def testTooMuchInput(self):
-        manager = VDEXManager(resource_stream(__name__, "test.xml"))
+        with resource_stream(__name__, "test.xml") as f:
+            manager = VDEXManager(f)
 
         xml = manager.serialize()
         matrix = manager.exportMatrix()
