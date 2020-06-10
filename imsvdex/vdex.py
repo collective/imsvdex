@@ -21,6 +21,7 @@ from io import BytesIO
 from lxml import etree
 from xml.parsers.expat import ExpatError
 
+import six
 import string
 
 
@@ -83,7 +84,7 @@ class VDEXManager(object):
           should the term be returned in the default language
           or as self.unnamed_term ?
         """
-        if isinstance(matrix, str):
+        if isinstance(matrix, six.string_types):
             raise AttributeError(
                 "This is the new imsvdex version. You "
                 "tried to pass the default language as "
@@ -118,7 +119,9 @@ class VDEXManager(object):
         """
         parses a VDEX vocabulary file or XML string
         """
-        if isinstance(file, str):
+        if isinstance(file, bytes):
+            file = BytesIO(file)
+        elif isinstance(file, six.text_type):
             file = BytesIO(file.encode("utf-8"))
         try:
             self.tree = etree.parse(file)
@@ -138,9 +141,7 @@ class VDEXManager(object):
         """
         returns the vocabulary as XML
         """
-        return etree.tostring(self.tree, encoding="utf-8", standalone=True).decode(
-            "utf-8"
-        )
+        return etree.tostring(self.tree, encoding="utf-8", standalone=True)
 
     def getVocabIdentifier(self):
         """
