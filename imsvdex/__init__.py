@@ -1,7 +1,7 @@
 import sys
 
 
-def safe_text(value, encoding='utf-8'):
+def safe_text(value, encoding="utf-8"):
     """Converts a value to text, even it is already a text string.
     Copied from Products.CMFPlone.utils.safe_text
 
@@ -34,7 +34,7 @@ def safe_text(value, encoding='utf-8'):
             try:
                 value = unicode(value, encoding)
             except (UnicodeDecodeError):
-                value = value.decode('utf-8', 'replace')
+                value = value.decode("utf-8", "replace")
         return value
 
     if isinstance(value, str):
@@ -43,5 +43,5 @@ def safe_text(value, encoding='utf-8'):
         try:
             value = str(value, encoding)
         except (UnicodeDecodeError):
-            value = value.decode('utf-8', 'replace')
+            value = value.decode("utf-8", "replace")
     return value

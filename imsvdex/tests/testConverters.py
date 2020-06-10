@@ -72,7 +72,9 @@ class Conversions(unittest.TestCase):
         data = new_manager.serialize()
         should_be_xml = '<?xml version="1.0" encoding="utf-8" ?>\n<vdex xmlns="http://www.imsglobal.org/xsd/imsvdex_v1p0"><term><termIdentifier>identical</termIdentifier><caption><langstring language="en">is identical with</langstring><langstring language="fr">est identique avec</langstring><langstring language="it">è identico con</langstring></caption></term><term><termIdentifier>relative</termIdentifier><caption><langstring language="de">ist verwandt mit</langstring><langstring language="en">is relative of</langstring><langstring language="fr">est parent avec</langstring><langstring language="it">è parente di</langstring></caption><term><termIdentifier>child</termIdentifier><caption><langstring language="de">ist Kind von</langstring><langstring language="en">is child of</langstring><langstring language="fr">est enfant de</langstring><langstring language="it">è prole di</langstring></caption></term></term></vdex>'
         obj = objectify.fromstring(should_be_xml.encode("utf-8"))
-        should_be = etree.tostring(obj, encoding="utf-8", standalone=True).decode("utf-8")
+        should_be = etree.tostring(obj, encoding="utf-8", standalone=True).decode(
+            "utf-8"
+        )
         self.assertEquals(should_be, data)
 
     def testEmptyMatrix(self):
