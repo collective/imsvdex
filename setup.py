@@ -30,5 +30,5 @@ setup(
     include_package_data=True,
     test_suite="imsvdex.tests",
     zip_safe=False,
-    install_requires=["lxml",],
+    install_requires=["lxml", "six"],
 )
