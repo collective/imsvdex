@@ -37,8 +37,8 @@ class VDEXError(Exception):
 
 class VDEXManager(object):
     """
-	Reads an IMS-VDEX vocabulary and constructs a VocabularyDict for ArcheTypes.
-	  See "IMS Vocabulary Definition Exchange": http://www.imsglobal.org/vdex/.
+    Reads an IMS-VDEX vocabulary and constructs a VocabularyDict for ArcheTypes.
+      See "IMS Vocabulary Definition Exchange": http://www.imsglobal.org/vdex/.
       XML binding: http://www.imsglobal.org/vdex/vdexv1p0/imsvdex_bindv1p0.html
       Not yet supported:
           term/mediadescriptor elements
@@ -75,11 +75,11 @@ class VDEXManager(object):
     ):
         """
         constructs a VDEX manager and parses a XML vocabulary
-		file: a file or string that is parsed
-		matrix: a two dimensional matrix that is parsed into a vdex file
-		lang: set the default language for output ('*' for multilingual terms)
+        file: a file or string that is parsed
+        matrix: a two dimensional matrix that is parsed into a vdex file
+        lang: set the default language for output ('*' for multilingual terms)
         namespace: declares the IMS-VDEX namespace in the vocab file
-		  ('' handles VDEX files without any declared namespace).
+          ('' handles VDEX files without any declared namespace).
         fallback: if no translation is found for the given language
           should the term be returned in the default language
           or as self.unnamed_term ?
