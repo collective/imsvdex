@@ -2,11 +2,11 @@
 Changes
 *******
 
-1.2 (unreleased)
+1.2 (2020-06-15)
 ----------------
 - Python 3 support.
   [ale-rt, reinhardt, thet]
-  
+
 - Add tox/travis testing environment.
   [thet]
 
